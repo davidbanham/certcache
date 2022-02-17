@@ -77,7 +77,12 @@ func Init(bucketName, project string) (StorageCache, error) {
 	}
 
 	if err := sc.bucket.Create(ctx, project, nil); err != nil {
-		if !strings.Contains(err.Error(), "You already own") {
+		// Error responses described here https://cloud.google.com/storage/docs/json_api/v1/status-codes?hl=en
+		// (note however that the docs as of 2022-02-17 are inaccurate/incomplete concerning the specific error message we should expect)
+		// The two code 409 errors below are expected/acceptable (bucket already exists):
+		// "Your previous request to create the named bucket succeeded and you already own it."
+		// "You already own this bucket. Please select another name."
+		if !strings.Contains(err.Error(), "ou already own") {
 			return sc, err
 		}
 	} else {
